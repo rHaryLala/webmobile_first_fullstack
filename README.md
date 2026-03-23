@@ -4,7 +4,6 @@ Application web simple pour pianiste, construite en JavaScript full-stack :
 - Frontend mobile-first avec Vite
 - Backend Node.js avec Express
 - Connexion API frontend <-> backend
-- Design minimaliste bleu marine (sans box-shadow)
 
 ## Structure du projet
 
