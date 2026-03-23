@@ -30,7 +30,7 @@ Application web simple pour pianiste, construite en JavaScript full-stack :
 Dans le dossier backend :
 
 ```powershell
-npm.cmd install
+npm install
 node server.js
 ```
 
@@ -42,8 +42,8 @@ http://localhost:3000/api/data
 Dans le dossier mobile-dashboard :
 
 ```powershell
-npm.cmd install
-npm.cmd run dev
+npm install
+npm run dev
 ```
 
 Application disponible sur :
