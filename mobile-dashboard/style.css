@@ -1,0 +1,82 @@
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	--navy-900: #0a1f44;
+	--navy-800: #12316b;
+	--navy-700: #1c458f;
+	--line: #d7dfef;
+	--bg: #f8faff;
+	--text: #0a1f44;
+	--surface: #ffffff;
+}
+
+body {
+	margin: 0;
+	font-family: "Segoe UI", Tahoma, sans-serif;
+	background: var(--bg);
+	color: var(--text);
+}
+
+.container {
+	max-width: 820px;
+	margin: 0 auto;
+	padding: 18px 14px 28px;
+}
+
+.header h1 {
+	margin: 0;
+	font-size: 1.5rem;
+}
+
+.header p {
+	margin: 6px 0 12px;
+	color: var(--navy-800);
+}
+
+#refresh {
+	appearance: none;
+	border: 1px solid var(--navy-700);
+	background: var(--navy-900);
+	color: #fff;
+	padding: 8px 12px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+#refresh:hover {
+	background: var(--navy-800);
+}
+
+.layout {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 10px;
+	margin-top: 14px;
+}
+
+@media (min-width: 768px) {
+	.layout {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 12px;
+}
+
+.card h2 {
+	margin: 0 0 6px;
+	font-size: 1rem;
+	color: var(--navy-900);
+}
+
+.card p {
+	margin: 0;
+	line-height: 1.4;
+	color: var(--navy-800);
+}
