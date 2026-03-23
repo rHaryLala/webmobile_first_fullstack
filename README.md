@@ -23,7 +23,6 @@ Application web simple pour pianiste, construite en JavaScript full-stack :
 
 - Frontend : HTML, CSS, JavaScript (ES6), Vite
 - Backend : Node.js, Express, CORS
-- Bonus : page Backbone.js (MVC + historique JS)
 
 ## Installation et execution
 
@@ -77,4 +76,3 @@ Note : Vite peut choisir un autre port (ex: 5173, 5174...) si un port est deja o
 - Styles : mobile-dashboard/style.css
 - Logique frontend : mobile-dashboard/main.js
 - API backend : backend/server.js
-- Bonus Backbone : mobile-dashboard/backbone-bonus.html
