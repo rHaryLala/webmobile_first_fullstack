@@ -11,8 +11,24 @@
 			<header class="header">
 				<h1>Aide-memoire Piano</h1>
 				<p>Notes rapides pour travailler au quotidien.</p>
-				<button id="refresh" type="button">Rafraichir</button>
+				<div class="actions-row">
+					<button id="refresh" type="button">Rafraichir</button>
+					<span id="network-status" class="status" aria-live="polite"></span>
+					<span id="sync-status" class="status" aria-live="polite"></span>
+				</div>
 			</header>
+
+			<section class="composer" aria-labelledby="composer-title">
+				<h2 id="composer-title">Nouvelle note</h2>
+				<form id="note-form">
+					<label for="note-title">Titre</label>
+					<input id="note-title" name="title" type="text" required maxlength="80" />
+					<label for="note-content">Contenu</label>
+					<textarea id="note-content" name="content" required rows="3" maxlength="280"></textarea>
+					<button type="submit">Ajouter</button>
+				</form>
+			</section>
+
 			<div id="cards" class="layout"></div>
 		</main>
 

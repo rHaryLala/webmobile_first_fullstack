@@ -35,6 +35,13 @@ body {
 	color: var(--navy-800);
 }
 
+.actions-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
 #refresh {
 	appearance: none;
 	border: 1px solid var(--navy-700);
@@ -46,6 +53,78 @@ body {
 }
 
 #refresh:hover {
+	background: var(--navy-800);
+}
+
+.status {
+	font-size: 0.85rem;
+	padding: 5px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	background: #fff;
+	color: var(--navy-800);
+}
+
+.status-online {
+	border-color: #a9e4bd;
+	background: #ecfdf3;
+	color: #065f46;
+}
+
+.status-offline {
+	border-color: #f6c38b;
+	background: #fff7ed;
+	color: #9a3412;
+}
+
+.composer {
+	margin-top: 14px;
+	padding: 12px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: var(--surface);
+}
+
+.composer h2 {
+	margin: 0 0 10px;
+	font-size: 1rem;
+	color: var(--navy-900);
+}
+
+#note-form {
+	display: grid;
+	gap: 8px;
+}
+
+#note-form label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--navy-800);
+}
+
+#note-form input,
+#note-form textarea {
+	width: 100%;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 8px;
+	font: inherit;
+	color: var(--text);
+	background: #fff;
+}
+
+#note-form button {
+	justify-self: start;
+	appearance: none;
+	border: 1px solid var(--navy-700);
+	background: var(--navy-900);
+	color: #fff;
+	padding: 8px 12px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+#note-form button:hover {
 	background: var(--navy-800);
 }
 
