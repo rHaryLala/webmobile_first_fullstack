@@ -90,6 +90,7 @@ Note : Vite peut choisir un autre port (ex: 5173, 5174...) si un port est deja o
 - Le frontend lit d'abord le cache local (`localStorage`) pour afficher les cartes, meme sans reseau.
 - Lorsqu'une note est ajoutee hors ligne, elle est affichee immediatement en mode "en attente de synchro".
 - L'action est stockee dans une file locale de synchronisation (`localStorage`).
+- Les suppressions lancees hors ligne sont aussi stockees dans une file locale (`localStorage`) puis rejouees au retour en ligne.
 - Au retour de la connexion (evenement navigateur `online`), la file est rejouee vers l'API.
 - Une fois synchronisee, la note locale est remplacee par la version serveur.
 - Le statut reseau est conserve dans `sessionStorage` pour tracer l'etat courant de la session.
