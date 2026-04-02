@@ -18,13 +18,15 @@ Application web simple pour pianiste, construite en JavaScript full-stack :
 - Bouton Rafraichir pour recharger les cartes
 - Interface responsive mobile-first
 - Creation de nouvelles notes depuis le frontend
+- Edition et suppression des notes via REST API
 - Mode offline-first avec cache local (`localStorage`)
 - Synchronisation automatique des actions en attente au retour de la connexion
+- Mise a jour en temps reel des nouvelles notes via WebSocket
 
 ## Stack technique
 
 - Frontend : HTML, CSS, JavaScript (ES6), Vite
-- Backend : Node.js, Express, CORS
+- Backend : Node.js, Express, CORS, ws (WebSocket)
 
 ## Installation et execution
 
@@ -39,6 +41,16 @@ node server.js
 
 API disponible sur :
 http://localhost:3000/api/data
+
+Operations REST disponibles :
+- GET /api/data : lister toutes les notes
+- GET /api/data/:id : lire une note
+- POST /api/data : creer une note
+- PUT /api/data/:id : mettre a jour une note
+- DELETE /api/data/:id : supprimer une note
+
+WebSocket disponible sur :
+ws://localhost:3000/ws
 
 ### 2) Frontend
 
@@ -71,6 +83,7 @@ Note : Vite peut choisir un autre port (ex: 5173, 5174...) si un port est deja o
 3. Le backend renvoie les cartes aide-memoire au format JSON.
 4. Le frontend injecte ces donnees dans l'interface.
 5. Le bouton Rafraichir relance la requete API.
+6. Le frontend maintient aussi une connexion WebSocket pour recevoir les nouvelles notes en temps reel.
 
 ## Approche Offline-First
 

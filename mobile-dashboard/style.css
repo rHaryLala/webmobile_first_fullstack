@@ -77,6 +77,12 @@ body {
 	color: #9a3412;
 }
 
+.status-connecting {
+	border-color: #bfdbfe;
+	background: #eff6ff;
+	color: #1d4ed8;
+}
+
 .composer {
 	margin-top: 14px;
 	padding: 12px;
@@ -158,4 +164,43 @@ body {
 	margin: 0;
 	line-height: 1.4;
 	color: var(--navy-800);
+}
+
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.card-actions button {
+	appearance: none;
+	border: 1px solid var(--navy-700);
+	background: #fff;
+	color: var(--navy-900);
+	padding: 6px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.85rem;
+}
+
+.card-actions button:hover {
+	background: #eef4ff;
+}
+
+.card-actions .card-danger {
+	border-color: #dc2626;
+	background: #fff5f5;
+	color: #991b1b;
+}
+
+.card-actions .card-danger:hover {
+	background: #ffe4e6;
+}
+
+.card-hint {
+	margin: 10px 0 0;
+	font-size: 0.8rem;
+	color: var(--navy-700);
 }
