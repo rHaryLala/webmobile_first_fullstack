@@ -20,6 +20,7 @@ const WS_URL = toWebSocketUrl(API_URL);
 const WS_RECONNECT_DELAY = 2500;
 const CACHE_KEY = "piano_notes_cache_v1";
 const QUEUE_KEY = "piano_sync_queue_v1";
+const DELETE_QUEUE_KEY = "piano_delete_queue_v1";
 const SESSION_NETWORK_KEY = "piano_last_network_state";
 
 let socket = null;
@@ -72,6 +73,8 @@ const getCachedNotes = () => readStorage(CACHE_KEY, []);
 const setCachedNotes = (notes) => writeStorage(CACHE_KEY, notes);
 const getQueue = () => readStorage(QUEUE_KEY, []);
 const setQueue = (queue) => writeStorage(QUEUE_KEY, queue);
+const getDeleteQueue = () => readStorage(DELETE_QUEUE_KEY, []);
+const setDeleteQueue = (queue) => writeStorage(DELETE_QUEUE_KEY, queue);
 
 const parseApiError = async (response) => {
 	try {
@@ -121,6 +124,19 @@ const apiDeleteNote = (id) =>
 	});
 
 const normalizeId = (value) => String(value);
+
+const removeNoteFromList = (notes, noteId) => {
+	const id = normalizeId(noteId);
+	return notes.filter((note) => normalizeId(note.id) !== id);
+};
+
+const isNotFoundApiError = (error) =>
+	error instanceof Error &&
+	(error.message.includes("404") || error.message.toLowerCase().includes("introuvable"));
+
+const isLikelyNetworkError = (error) =>
+	error instanceof TypeError ||
+	(error instanceof Error && /failed to fetch|network/i.test(error.message));
 
 const setStatusBadge = (element, text, kind) => {
 	if (!element) {
@@ -174,9 +190,24 @@ const updateRealtimeStatus = (state) => {
 };
 
 const updateSyncStatus = () => {
-	const queue = getQueue();
-	const pending = queue.length;
-	syncStatus.textContent = pending ? `${pending} action(s) a synchroniser` : "Tout est synchronise";
+	const createPending = getQueue().length;
+	const deletePending = getDeleteQueue().length;
+	const pending = createPending + deletePending;
+
+	if (!pending) {
+		syncStatus.textContent = "Tout est synchronise";
+		return;
+	}
+
+	const details = [];
+	if (createPending) {
+		details.push(`${createPending} ajout(s)`);
+	}
+	if (deletePending) {
+		details.push(`${deletePending} suppression(s)`);
+	}
+
+	syncStatus.textContent = `${pending} action(s) a synchroniser (${details.join(", ")})`;
 };
 
 const persistAndRenderNotes = (notes) => {
@@ -191,9 +222,38 @@ const getCachedNoteById = (noteId) => {
 };
 
 const removeNoteFromCache = (noteId) => {
-	const id = normalizeId(noteId);
-	const filtered = getCachedNotes().filter((note) => normalizeId(note.id) !== id);
+	const filtered = removeNoteFromList(getCachedNotes(), noteId);
 	persistAndRenderNotes(filtered);
+};
+
+const removeDeleteFromQueue = (noteId) => {
+	const id = normalizeId(noteId);
+	const queue = getDeleteQueue();
+	const filtered = queue.filter((item) => normalizeId(item.id) !== id);
+
+	if (filtered.length !== queue.length) {
+		setDeleteQueue(filtered);
+	}
+
+	updateSyncStatus();
+};
+
+const queueDeleteForSync = (noteId) => {
+	const id = normalizeId(noteId);
+	const queue = getDeleteQueue();
+
+	if (queue.some((item) => normalizeId(item.id) === id)) {
+		updateSyncStatus();
+		return;
+	}
+
+	queue.push({
+		id: noteId,
+		deletedAt: new Date().toISOString()
+	});
+
+	setDeleteQueue(queue);
+	updateSyncStatus();
 };
 
 const mergeServerNote = (serverNote) => {
@@ -225,6 +285,7 @@ const handleSocketMessage = (event) => {
 		}
 
 		if (message?.type === "note_deleted" && message.payload?.id !== undefined) {
+			removeDeleteFromQueue(message.payload.id);
 			removeNoteFromCache(message.payload.id);
 		}
 	} catch {
@@ -290,7 +351,7 @@ const connectWebSocket = () => {
 	});
 };
 
-const syncQueuedActions = async () => {
+const syncQueuedCreates = async () => {
 	if (!navigator.onLine) {
 		updateSyncStatus();
 		return;
@@ -327,6 +388,49 @@ const syncQueuedActions = async () => {
 	persistAndRenderNotes(cachedNotes);
 };
 
+const syncQueuedDeletes = async () => {
+	if (!navigator.onLine) {
+		updateSyncStatus();
+		return;
+	}
+
+	const queue = getDeleteQueue();
+	if (!queue.length) {
+		updateSyncStatus();
+		return;
+	}
+
+	const remaining = [];
+	let cachedNotes = getCachedNotes();
+
+	for (const action of queue) {
+		try {
+			await apiDeleteNote(action.id);
+			cachedNotes = removeNoteFromList(cachedNotes, action.id);
+		} catch (error) {
+			if (isNotFoundApiError(error)) {
+				cachedNotes = removeNoteFromList(cachedNotes, action.id);
+				continue;
+			}
+
+			remaining.push(action);
+		}
+	}
+
+	setDeleteQueue(remaining);
+	persistAndRenderNotes(cachedNotes);
+};
+
+const syncQueuedActions = async () => {
+	if (!navigator.onLine) {
+		updateSyncStatus();
+		return;
+	}
+
+	await syncQueuedDeletes();
+	await syncQueuedCreates();
+};
+
 const loadFromCacheFirst = () => {
 	const cached = getCachedNotes();
 	renderCards(cached);
@@ -341,9 +445,12 @@ const fetchData = async () => {
 		}
 
 		const data = await apiListNotes();
+		const deleteQueue = getDeleteQueue();
+		const deletedIds = new Set(deleteQueue.map((item) => normalizeId(item.id)));
+		const visibleServerNotes = data.filter((note) => !deletedIds.has(normalizeId(note.id)));
 		const pendingQueue = getQueue();
 		const optimisticPendingNotes = pendingQueue
-			.filter((item) => !data.some((note) => note.clientRequestId === item.clientId))
+			.filter((item) => !visibleServerNotes.some((note) => note.clientRequestId === item.clientId))
 			.map((item) => ({
 				id: item.clientId,
 				title: item.title,
@@ -352,7 +459,7 @@ const fetchData = async () => {
 				pending: true
 			}));
 
-		const merged = [...data, ...optimisticPendingNotes];
+		const merged = [...visibleServerNotes, ...optimisticPendingNotes];
 		persistAndRenderNotes(merged);
 	} catch (error) {
 		loadFromCacheFirst();
@@ -417,10 +524,6 @@ const updateNoteFromUI = async (noteId) => {
 };
 
 const deleteNoteFromUI = async (noteId) => {
-	if (!ensureOnlineForMutations()) {
-		return;
-	}
-
 	const note = getCachedNoteById(noteId);
 	if (!note || note.pending) {
 		return;
@@ -431,10 +534,29 @@ const deleteNoteFromUI = async (noteId) => {
 		return;
 	}
 
+	if (!navigator.onLine) {
+		queueDeleteForSync(note.id);
+		removeNoteFromCache(note.id);
+		return;
+	}
+
 	try {
 		await apiDeleteNote(note.id);
+		removeDeleteFromQueue(note.id);
 		removeNoteFromCache(note.id);
 	} catch (error) {
+		if (isNotFoundApiError(error)) {
+			removeDeleteFromQueue(note.id);
+			removeNoteFromCache(note.id);
+			return;
+		}
+
+		if (isLikelyNetworkError(error)) {
+			queueDeleteForSync(note.id);
+			removeNoteFromCache(note.id);
+			return;
+		}
+
 		window.alert(error instanceof Error ? error.message : "Echec de suppression.");
 	}
 };
